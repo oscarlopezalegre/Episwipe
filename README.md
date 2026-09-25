@@ -38,6 +38,8 @@ dramas, anime shorts), but works with any show in your Plex library.
 - Docker, or Node.js 20 or later.
 - Swiplex must be able to reach your Plex server over the network (for example
   `http://192.168.1.10:32400`).
+- To watch from **outside your home network**, a Plex Pass (or a Remote Watch Pass
+  for the viewer). See [Plex Pass and remote streaming](#plex-pass-and-remote-streaming).
 
 ## Quick start
 
@@ -135,6 +137,28 @@ On touch screens: swipe up and down to change episode, and tap to pause.
 - **Progress** (last episode, position, watched episodes) is stored in the
   browser's `localStorage`, so it is per device.
 
+## Plex Pass and remote streaming
+
+Swiplex only exists because Plex does the hard work: organising your library,
+fetching metadata, and transcoding video for every device. **If Swiplex is useful
+to you, please support Plex.**
+
+Since 30 April 2025, Plex requires a paid plan to stream personal media **outside
+your home network**:
+
+- **Plex Pass** for the server owner, which also covers everyone you share your
+  server with; or
+- **Remote Watch Pass** for an individual viewer who streams from someone else's server.
+
+Swiplex fetches video from your Plex server on the network where it runs and
+serves it to the browser itself, so Plex may not see a viewer as remote. **That
+does not change Plex's terms.** If you or the people you share with use Swiplex
+from outside your home, get the plan Plex requires for remote playback. Swiplex
+is meant to be a nicer way to watch, not a way around paying for Plex.
+
+- Plans: <https://www.plex.tv/plans/>
+- Plex's rules: [Requirements for remote playback of personal media](https://support.plex.tv/articles/requirements-for-remote-playback-of-personal-media/)
+
 ## Your data
 
 `DATA_DIR` contains:
@@ -174,6 +198,13 @@ request fails and they are signed out automatically.
 Issues and pull requests are welcome. The project deliberately stays small: one
 dependency-free `server.js` and plain HTML/CSS/JS in `public/`, with no build step.
 Please keep it that way, and describe how you tested your change.
+
+## Acknowledgements
+
+Thank you to the Plex team for building a media server that is open enough for
+projects like this to exist, and for Plex Pass, which keeps it going. And thanks to
+the [hls.js](https://github.com/video-dev/hls.js) contributors for the player that
+makes transcoded playback work in every browser.
 
 ## License
 
