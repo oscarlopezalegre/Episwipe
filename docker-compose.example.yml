@@ -1,9 +1,9 @@
 # Copy to docker-compose.yml and adjust PLEX_URL / PUBLIC_URL.
 services:
-  swiplex:
+  episwipe:
     build: .
-    # image: ghcr.io/oscarlopezalegre/swiplex:latest   # if you publish an image
-    container_name: swiplex
+    # image: ghcr.io/oscarlopezalegre/episwipe:latest   # if you publish an image
+    container_name: episwipe
     restart: unless-stopped
     ports:
       - "8787:8787"
@@ -11,6 +11,6 @@ services:
       # If Plex runs in the same compose project, use its service name:
       # PLEX_URL: http://plex:32400
       PLEX_URL: http://192.168.1.10:32400
-      # PUBLIC_URL: https://swiplex.example.com
+      # PUBLIC_URL: https://episwipe.example.com
     volumes:
       - ./data:/data   # show selection + login sessions (keep private)

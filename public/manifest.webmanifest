@@ -1,6 +1,6 @@
 {
-  "name": "Swiplex",
-  "short_name": "Swiplex",
+  "name": "Episwipe",
+  "short_name": "Episwipe",
   "description": "Swipe through the TV shows on your Plex server, one episode per screen.",
   "start_url": "/",
   "display": "standalone",

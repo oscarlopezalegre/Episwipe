@@ -1,6 +1,6 @@
 # Third-party notices
 
-Swiplex bundles the following software:
+Episwipe bundles the following software:
 
 ## hls.js 1.7.3
 

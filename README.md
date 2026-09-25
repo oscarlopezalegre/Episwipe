@@ -1,8 +1,8 @@
-# Swiplex
+# Episwipe
 
-**Swipe through the TV shows on your Plex server, one episode per screen.**
+**A swipe player for Plex: go through the TV shows on your Plex server, one episode per screen.**
 
-Swiplex is a small, self-hosted web app that turns your Plex TV library into a
+Episwipe is a small, self-hosted web app that turns your Plex TV library into a
 vertical, TikTok-style player: open a show, swipe up for the next episode, and pick
 up where you left off. It is made for short-episode series (web series, short
 dramas, anime shorts), but works with any show in your Plex library.
@@ -28,7 +28,7 @@ dramas, anime shorts), but works with any show in your Plex library.
 - **Plays anything Plex can serve**: H.264 MP4 plays directly; everything else is
   streamed through Plex's transcoder (HLS).
 - **Private by design**: Plex tokens never reach the browser. All media is proxied
-  through Swiplex, and the app talks only to your Plex server and plex.tv.
+  through Episwipe, and the app talks only to your Plex server and plex.tv.
 - **Tiny**: one Node.js file with no dependencies, plus a static front end.
   Installable on your phone's home screen.
 
@@ -36,7 +36,7 @@ dramas, anime shorts), but works with any show in your Plex library.
 
 - A Plex Media Server with at least one **TV Shows** library.
 - Docker, or Node.js 20 or later.
-- Swiplex must be able to reach your Plex server over the network (for example
+- Episwipe must be able to reach your Plex server over the network (for example
   `http://192.168.1.10:32400`).
 - To watch from **outside your home network**, a Plex Pass (or a Remote Watch Pass
   for the viewer). See [Plex Pass and remote streaming](#plex-pass-and-remote-streaming).
@@ -46,8 +46,8 @@ dramas, anime shorts), but works with any show in your Plex library.
 ### Docker Compose
 
 ```bash
-git clone https://github.com/oscarlopezalegre/swiplex.git
-cd swiplex
+git clone https://github.com/oscarlopezalegre/episwipe.git
+cd episwipe
 cp docker-compose.example.yml docker-compose.yml
 # edit PLEX_URL (and PUBLIC_URL if you use a domain), then:
 docker compose up -d --build
@@ -56,17 +56,17 @@ docker compose up -d --build
 Open `http://<your-host>:8787`, sign in with the Plex account that **owns** the
 server, tap **Manage**, and tick the shows you want, giving each one a category.
 
-If Plex runs in the same Compose project, point Swiplex at its service name:
+If Plex runs in the same Compose project, point Episwipe at its service name:
 `PLEX_URL: http://plex:32400`.
 
 ### Docker
 
 ```bash
-docker build -t swiplex .
-docker run -d --name swiplex -p 8787:8787 \
+docker build -t episwipe .
+docker run -d --name episwipe -p 8787:8787 \
   -e PLEX_URL=http://192.168.1.10:32400 \
   -v "$PWD/data:/data" \
-  swiplex
+  episwipe
 ```
 
 ### Node.js
@@ -82,8 +82,8 @@ All settings are environment variables (or a `.env` file next to `server.js`).
 
 | Variable | Default | Description |
 |---|---|---|
-| `PLEX_URL` | `http://localhost:32400` | Your Plex Media Server, as reachable from Swiplex. |
-| `PUBLIC_URL` | *(from the request)* | The address people use to open Swiplex, e.g. `https://swiplex.example.com`. Recommended behind a reverse proxy: it is used as the return address after "Sign in with Plex" and decides whether cookies are marked `Secure`. |
+| `PLEX_URL` | `http://localhost:32400` | Your Plex Media Server, as reachable from Episwipe. |
+| `PUBLIC_URL` | *(from the request)* | The address people use to open Episwipe, e.g. `https://episwipe.example.com`. Recommended behind a reverse proxy: it is used as the return address after "Sign in with Plex" and decides whether cookies are marked `Secure`. |
 | `PORT` | `8787` | Port to listen on. |
 | `HOST` | `0.0.0.0` | Interface to listen on. |
 | `DATA_DIR` | `./data` (`/data` in Docker) | Where the show selection and sign-in sessions are stored. |
@@ -91,11 +91,11 @@ All settings are environment variables (or a `.env` file next to `server.js`).
 
 ## Using it behind a reverse proxy (HTTPS)
 
-Swiplex works behind any reverse proxy (Nginx Proxy Manager, Caddy, Traefik, nginx…).
+Episwipe works behind any reverse proxy (Nginx Proxy Manager, Caddy, Traefik, nginx…).
 
 1. Set `PUBLIC_URL` to the public HTTPS address.
 2. Make sure the proxy forwards `X-Forwarded-Proto` (most do by default).
-3. Don't buffer or time out long responses: videos are streamed through Swiplex.
+3. Don't buffer or time out long responses: videos are streamed through Episwipe.
 
 A plain nginx example:
 
@@ -125,13 +125,13 @@ On touch screens: swipe up and down to change episode, and tap to pause.
 ## How it works
 
 - **Sign-in** uses Plex's PIN flow, the same one Plex's own apps use. After you
-  approve Swiplex on plex.tv, Swiplex checks that your account has access to *this*
+  approve Episwipe on plex.tv, Episwipe checks that your account has access to *this*
   server and stores that server's access token for your session. It never stores
   your plex.tv account token.
 - **Who can do what:** anyone with access to the server can watch the shows the
   owner selected, limited to the libraries their own Plex account can see. Only the
   owner sees **Manage**.
-- **Streaming:** every image and video request goes through Swiplex, which adds the
+- **Streaming:** every image and video request goes through Episwipe, which adds the
   token server-side. Episodes that are H.264 in MP4 play directly (no transcoding);
   others use Plex's HLS transcoder, with one transcode session per viewer.
 - **Progress** (last episode, position, watched episodes) is stored in the
@@ -139,8 +139,8 @@ On touch screens: swipe up and down to change episode, and tap to pause.
 
 ## Plex Pass and remote streaming
 
-Swiplex only exists because Plex does the hard work: organising your library,
-fetching metadata, and transcoding video for every device. **If Swiplex is useful
+Episwipe only exists because Plex does the hard work: organising your library,
+fetching metadata, and transcoding video for every device. **If Episwipe is useful
 to you, please support Plex.**
 
 Since 30 April 2025, Plex requires a paid plan to stream personal media **outside
@@ -150,10 +150,10 @@ your home network**:
   server with; or
 - **Remote Watch Pass** for an individual viewer who streams from someone else's server.
 
-Swiplex fetches video from your Plex server on the network where it runs and
+Episwipe fetches video from your Plex server on the network where it runs and
 serves it to the browser itself, so Plex may not see a viewer as remote. **That
-does not change Plex's terms.** If you or the people you share with use Swiplex
-from outside your home, get the plan Plex requires for remote playback. Swiplex
+does not change Plex's terms.** If you or the people you share with use Episwipe
+from outside your home, get the plan Plex requires for remote playback. Episwipe
 is meant to be a nicer way to watch, not a way around paying for Plex.
 
 - Plans: <https://www.plex.tv/plans/>
@@ -167,7 +167,7 @@ is meant to be a nicer way to watch, not a way around paying for Plex.
 |---|---|
 | `data.json` | The shows you selected and their categories. |
 | `sessions.json` | Active sign-ins, **including each user's Plex access token for your server**. Written with `0600` permissions; keep this directory private and out of backups you share. |
-| `client.json` | A random identifier for this Swiplex install, required by plex.tv. |
+| `client.json` | A random identifier for this Episwipe install, required by plex.tv. |
 
 Signing out deletes the session. If a user's access is removed in Plex, their next
 request fails and they are signed out automatically.
@@ -175,10 +175,10 @@ request fails and they are signed out automatically.
 ## Security notes
 
 - Only people whose Plex account has access to your server can sign in.
-- Swiplex sends a strict Content-Security-Policy and never exposes Plex tokens to
+- Episwipe sends a strict Content-Security-Policy and never exposes Plex tokens to
   the browser.
 - Serve it over HTTPS when it is reachable from the internet (see above).
-- Swiplex does not add its own rate limiting; put it behind your usual reverse
+- Episwipe does not add its own rate limiting; put it behind your usual reverse
   proxy protections if you expose it publicly.
 
 ## Troubleshooting
@@ -186,7 +186,7 @@ request fails and they are signed out automatically.
 - **"That Plex account doesn't have access to this server"**: sign in with the
   owner account, or share the server with that account in Plex first.
 - **Sign-in returns to the wrong address**: set `PUBLIC_URL`.
-- **Shows load but videos don't play**: check that Swiplex can reach `PLEX_URL`,
+- **Shows load but videos don't play**: check that Episwipe can reach `PLEX_URL`,
   and that the Plex server is allowed to transcode (Settings → Transcoder) for
   files that aren't H.264 MP4.
 - **Nothing to watch after signing in**: the owner needs to select shows in
@@ -208,7 +208,7 @@ makes transcoded playback work in every browser.
 
 ## License
 
-[MIT](LICENSE). Swiplex bundles [hls.js](https://github.com/video-dev/hls.js)
+[MIT](LICENSE). Episwipe bundles [hls.js](https://github.com/video-dev/hls.js)
 (Apache 2.0), see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Swiplex is an independent project and is not affiliated with or endorsed by Plex, Inc.
+Episwipe is an independent project and is not affiliated with or endorsed by Plex, Inc.

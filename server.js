@@ -1,4 +1,4 @@
-// Swiplex: a TikTok-style swipe player for the TV shows on your Plex server.
+// Episwipe: a TikTok-style swipe player for the TV shows on your Plex server.
 //
 // People sign in with their own Plex account ("Sign in with Plex" PIN flow) and
 // watch with that account's access to this server. The server owner picks which
@@ -29,7 +29,7 @@ const PLEX_URL = (process.env.PLEX_URL || 'http://localhost:32400').replace(/\/$
 const PORT = Number(process.env.PORT) || 8787;
 const HOST = process.env.HOST || '0.0.0.0';
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
-// Public address people use to reach Swiplex, e.g. https://swiplex.example.com.
+// Public address people use to reach Episwipe, e.g. https://episwipe.example.com.
 // Used for the Plex sign-in return URL; without it the request's Host header is used.
 const PUBLIC_URL = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
 const SESSION_DAYS = Number(process.env.SESSION_DAYS) || 90;
@@ -54,17 +54,18 @@ const writeJson = (f, d, mode = 0o644) => {
 const loadData = () => readJson(DATA_FILE, { shows: {} });
 const saveData = (d) => writeJson(DATA_FILE, d);
 
-// Stable identifier for this install, required by plex.tv.
+// Stable identifier for this install, required by plex.tv. Installs created
+// before the rename keep their original 'swiplex-' id so Plex sees the same device.
 const CLIENT_ID = (() => {
   const c = readJson(CLIENT_FILE, null);
   if (c?.id) return c.id;
-  const id = `swiplex-${crypto.randomUUID()}`;
+  const id = `episwipe-${crypto.randomUUID()}`;
   writeJson(CLIENT_FILE, { id });
   return id;
 })();
 const PLEX_HEADERS = {
-  Accept: 'application/json', 'X-Plex-Product': 'Swiplex', 'X-Plex-Version': '1.0',
-  'X-Plex-Client-Identifier': CLIENT_ID, 'X-Plex-Platform': 'Web', 'X-Plex-Device-Name': 'Swiplex',
+  Accept: 'application/json', 'X-Plex-Product': 'Episwipe', 'X-Plex-Version': '1.0',
+  'X-Plex-Client-Identifier': CLIENT_ID, 'X-Plex-Platform': 'Web', 'X-Plex-Device-Name': 'Episwipe',
 };
 
 // ---- sessions ---------------------------------------------------------------------
@@ -89,7 +90,9 @@ const cookie = (req, name, value, maxAge) =>
   `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${isHttps(req) ? '; Secure' : ''}`;
 
 function getSession(req) {
-  const sid = parseCookies(req).swx;
+  const c = parseCookies(req);
+  // 'swx' is the cookie name used before the rename to Episwipe; still accepted.
+  const sid = c.epw || c.swx;
   const s = sid && Object.hasOwn(sessions, sid) ? sessions[sid] : null;
   if (!s) return null;
   if (Date.now() - s.created > SESSION_DAYS * 864e5) { delete sessions[sid]; saveSessions(); return null; }
@@ -156,7 +159,7 @@ function hlsUrl(id, sid) {
   const q = new URLSearchParams({
     path: `/library/metadata/${id}`, protocol: 'hls', mediaIndex: 0, partIndex: 0,
     directStream: 1, directPlay: 0, fastSeek: 1, videoResolution: '1920x1080',
-    session: `swiplex-${id}-${viewer}`, 'X-Plex-Client-Identifier': CLIENT_ID, 'X-Plex-Product': 'Swiplex', 'X-Plex-Platform': 'Chrome',
+    session: `episwipe-${id}-${viewer}`, 'X-Plex-Client-Identifier': CLIENT_ID, 'X-Plex-Product': 'Episwipe', 'X-Plex-Platform': 'Chrome',
   });
   return `/plex/video/:/transcode/universal/start.m3u8?${q}`;
 }
@@ -193,18 +196,18 @@ function publicBase(req) {
 async function startLogin(req, res) {
   const pin = await plexTv('/api/v2/pins?strong=true', { method: 'POST' });
   const q = new URLSearchParams({
-    clientID: CLIENT_ID, code: pin.code, forwardUrl: `${publicBase(req)}/auth/callback`, 'context[device][product]': 'Swiplex',
+    clientID: CLIENT_ID, code: pin.code, forwardUrl: `${publicBase(req)}/auth/callback`, 'context[device][product]': 'Episwipe',
   });
-  res.writeHead(302, { Location: `https://app.plex.tv/auth#?${q}`, 'Set-Cookie': cookie(req, 'swx_pin', pin.id, 900) });
+  res.writeHead(302, { Location: `https://app.plex.tv/auth#?${q}`, 'Set-Cookie': cookie(req, 'epw_pin', pin.id, 900) });
   res.end();
 }
 
 async function finishLogin(req, res) {
   const redirect = (to, cookies = []) => {
-    res.writeHead(302, { Location: to, 'Set-Cookie': [cookie(req, 'swx_pin', '', 0), ...cookies] });
+    res.writeHead(302, { Location: to, 'Set-Cookie': [cookie(req, 'epw_pin', '', 0), ...cookies] });
     res.end();
   };
-  const pinId = parseCookies(req).swx_pin;
+  const pinId = parseCookies(req).epw_pin;
   if (!pinId) return redirect('/?login=failed');
   // plex.tv can take a moment to attach the token after redirecting back.
   let authToken;
@@ -232,7 +235,7 @@ async function finishLogin(req, res) {
   };
   saveSessions();
   console.log(`login: ${sessions[id].name}${sessions[id].owner ? ' (owner)' : ''}`);
-  redirect('/', [cookie(req, 'swx', id, SESSION_DAYS * 86400)]);
+  redirect('/', [cookie(req, 'epw', id, SESSION_DAYS * 86400), cookie(req, 'swx', '', 0)]);
 }
 
 // ---- HTTP -----------------------------------------------------------------------
@@ -301,7 +304,7 @@ const server = http.createServer(async (req, res) => {
     if (p === '/auth/logout' && req.method === 'POST') {
       const s = getSession(req);
       if (s) { delete sessions[s.sid]; saveSessions(); }
-      return send(res, 200, { ok: true }, { 'Set-Cookie': cookie(req, 'swx', '', 0) });
+      return send(res, 200, { ok: true }, { 'Set-Cookie': [cookie(req, 'epw', '', 0), cookie(req, 'swx', '', 0)] });
     }
 
     if (p.startsWith('/api/') || p.startsWith('/plex/')) {
@@ -337,7 +340,7 @@ const server = http.createServer(async (req, res) => {
     if (e instanceof PlexAuthError && session) {
       // Token revoked or access removed: end the session so the user signs in again.
       delete sessions[session.sid]; saveSessions();
-      if (!res.headersSent) return send(res, 401, { error: 'login required' }, { 'Set-Cookie': cookie(req, 'swx', '', 0) });
+      if (!res.headersSent) return send(res, 401, { error: 'login required' }, { 'Set-Cookie': [cookie(req, 'epw', '', 0), cookie(req, 'swx', '', 0)] });
     }
     console.error(`${req.method} ${p}:`, e.message);
     if (!res.headersSent) send(res, 500, { error: 'server error' });
@@ -352,6 +355,6 @@ server.on('error', (e) => {
   console.error(e.code === 'EADDRINUSE' ? `Port ${PORT} is already in use. Set PORT to another value.` : e.message);
   process.exit(1);
 });
-server.listen(PORT, HOST, () => console.log(`Swiplex on http://localhost:${PORT} (Plex: ${PLEX_URL})`));
+server.listen(PORT, HOST, () => console.log(`Episwipe on http://localhost:${PORT} (Plex: ${PLEX_URL})`));
 
 for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => server.close(() => process.exit(0)));

@@ -1,6 +1,17 @@
-// Swiplex front end: show grid, owner "Manage" view and the full-screen swipe
+// Episwipe front end: show grid, owner "Manage" view and the full-screen swipe
 // player. Progress and watched episodes are kept per browser in localStorage.
 'use strict';
+
+// One-time migration of progress saved before the rename (swiplex:* keys).
+try {
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith('swiplex:')) continue;
+    const nk = 'episwipe:' + k.slice('swiplex:'.length);
+    if (localStorage.getItem(nk) === null) localStorage.setItem(nk, localStorage.getItem(k));
+    localStorage.removeItem(k);
+  }
+} catch { /* storage unavailable: nothing to migrate */ }
 const $ = (s) => document.querySelector(s);
 const app = $('#app'), feed = $('#feed');
 async function api(p, o) {
@@ -97,8 +108,8 @@ function renderManage(shows) {
 }
 
 // ---- progress (per browser) ----
-const getProgress = (id) => { try { return JSON.parse(localStorage.getItem('swiplex:' + id)); } catch { return null; } };
-const setProgress = (id, v) => { try { localStorage.setItem('swiplex:' + id, JSON.stringify(v)); } catch {} };
+const getProgress = (id) => { try { return JSON.parse(localStorage.getItem('episwipe:' + id)); } catch { return null; } };
+const setProgress = (id, v) => { try { localStorage.setItem('episwipe:' + id, JSON.stringify(v)); } catch {} };
 
 // ---- feed ----
 const ui = $('#chrome'), sheet = $('#sheet'), seekEl = $('#seek');
@@ -109,8 +120,8 @@ const slideAt = (i) => feed.querySelectorAll('.slide')[i];
 const activeVideo = () => slideAt(activeIndex)?.querySelector('video');
 
 // Watched episodes (per browser): indexes that were opened.
-const getSeen = (id) => { try { return new Set(JSON.parse(localStorage.getItem('swiplex:seen:' + id)) || []); } catch { return new Set(); } };
-const addSeen = (id, i) => { const s = getSeen(id); s.add(i); try { localStorage.setItem('swiplex:seen:' + id, JSON.stringify([...s])); } catch {} };
+const getSeen = (id) => { try { return new Set(JSON.parse(localStorage.getItem('episwipe:seen:' + id)) || []); } catch { return new Set(); } };
+const addSeen = (id, i) => { const s = getSeen(id); s.add(i); try { localStorage.setItem('episwipe:seen:' + id, JSON.stringify([...s])); } catch {} };
 
 async function openFeed(showId, title) {
   currentShow = showId; showTitle = title;
