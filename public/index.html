@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<meta name="description" content="Swipe through the TV shows on your Plex server, one episode per screen.">
+<title>Swiplex</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/app.css">
+<script src="/vendor/hls.min.js" defer></script>
+<script src="/app.js" defer></script>
+</head>
+<body>
+<header>
+  <h1>Swip<span>lex</span></h1>
+  <div class="hright">
+    <button class="pill hidden" id="navBtn">Manage</button>
+    <button class="me hidden" id="meBtn" title="Sign out"></button>
+  </div>
+</header>
+<main id="app"></main>
+
+<div id="feed" class="hidden"></div>
+<div id="chrome" class="hidden">
+  <div class="ptop"><button id="closeFeed" aria-label="Back">‹</button><b id="pEp"></b></div>
+  <div class="rail">
+    <button id="railEps" aria-label="Episodes">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+      Episodes
+    </button>
+    <button id="railReload" aria-label="Reload">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>
+      Reload
+    </button>
+  </div>
+  <div class="pbottom">
+    <div class="pinfo"><b id="pTitle"></b><small id="pSub"></small></div>
+    <div class="seek" id="seek"><div class="track"><div class="fill"></div><div class="knob"></div></div><div class="bubble"></div></div>
+    <button class="epbar" id="epbar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      <b>Episodes</b><span id="epbarTxt"></span>›
+    </button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <div class="shead"><div><b id="sTitle"></b><small id="sSub"></small></div><button id="sClose" aria-label="Close">✕</button></div>
+  <div class="tabs" id="sTabs"></div>
+  <div class="eps" id="sEps"></div>
+</div>
+<div class="backdrop" id="backdrop"></div>
+
+</body>
+</html>

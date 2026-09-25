@@ -1,0 +1,9 @@
+# Runtime data: show selection, login sessions (contain Plex tokens), client id
+data/
+data.json
+sessions.json
+client.json
+.env
+*.log
+node_modules/
+.DS_Store

@@ -1,0 +1,19 @@
+{
+  "name": "swiplex",
+  "version": "1.0.0",
+  "description": "TikTok-style swipe player for the TV shows on your Plex server",
+  "license": "MIT",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oscarlopezalegre/swiplex.git"
+  },
+  "keywords": ["plex", "video", "player", "self-hosted", "short-drama", "swipe"]
+}

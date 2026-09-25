@@ -1,0 +1,9 @@
+.git
+data
+data.json
+sessions.json
+client.json
+.env
+*.log
+node_modules
+docs
